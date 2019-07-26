@@ -81,5 +81,5 @@ if [ -n "$ENV_NAME" ] && [ -n "$DIRECTORY_NAME" ] ; then
 fi
 
 if [ -n "$POD_NAME" ]; then
-  kubectl delete pod --all-namespace -l app=${POD_NAME}
+  kubectl delete pod -l app=${POD_NAME}
 fi

@@ -6,11 +6,12 @@ initialize () {
   POD_NAME=""
   MSG_LEVEL=""
   MSG_TXT=""
+  DRY_RUN=""
   FLUG_ERROR=false
 }
 
 show_help () {
-  echo "kload.sh -e ENV_NAME -d DIRECTORY_NAME -p [RESTART_POD_LABEL]"
+  echo "kload.sh -e ENV_NAME -d DIRECTORY_NAME [-p RESTART_POD_LABEL] [-c --dry-run]"
   exit 1
 }
 
@@ -46,7 +47,7 @@ if [ $# -le 1 ]; then
   show_help
 fi
 
-while getopts he:d:p: OPT
+while getopts che:d:p: OPT
 do
   case $OPT in
     "e" )
@@ -57,6 +58,8 @@ do
       POD_NAME=$OPTARG ;;
     "D" )
       FLUG_DEBUG=true ;;
+    "c" )
+      DRY_RUN="--dry-run" ;;
     "h" | * | "" )
       show_help ;;
    esac
@@ -69,7 +72,7 @@ fi
 
 if [ -n "$ENV_NAME" ] && [ -n "$DIRECTORY_NAME" ] ; then
   helm template ${DIRECTORY_NAME} --values ${DIRECTORY_NAME}/values/${ENV_NAME}-${DIRECTORY_NAME}.yaml > ${ENV_NAME}-${DIRECTORY_NAME}.yaml
-  kubectl apply -f ${ENV_NAME}-${DIRECTORY_NAME}.yaml
+  kubectl apply -f ${ENV_NAME}-${DIRECTORY_NAME}.yaml ${DRY_RUN}
   rm -rf ${ENV_NAME}-${DIRECTORY_NAME}.yaml
 fi
 

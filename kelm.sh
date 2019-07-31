@@ -1,4 +1,4 @@
-#!/bin/bash -eu
+#!/bin/bash
 
 initialize () {
   ENV_NAME=""
@@ -90,7 +90,7 @@ if [ "$FLUG_ALL_DRY_RUN" = true ]; then
     apply_template $ENV_NAME $DIR
   done
   exit 1
-  
+
 elif [ -n "$ENV_NAME" ] && [ -n "$DIRECTORY_NAME" ] ; then
   apply_template $ENV_NAME $DIRECTORY_NAME
 fi

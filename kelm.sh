@@ -7,6 +7,7 @@ initialize () {
   MSG_LEVEL=""
   MSG_TXT=""
   DRY_RUN=""
+  FLUG_ALL_DRY_RUN=false
   FLUG_ERROR=false
 }
 
@@ -47,7 +48,7 @@ if [ $# -le 1 ]; then
   show_help
 fi
 
-while getopts che:d:p: OPT
+while getopts cChe:d:p: OPT
 do
   case $OPT in
     "e" )
@@ -56,25 +57,44 @@ do
       DIRECTORY_NAME=$OPTARG ;;
     "p" )
       POD_NAME=$OPTARG ;;
-    "D" )
-      FLUG_DEBUG=true ;;
     "c" )
       DRY_RUN="--dry-run" ;;
+    "C" )
+      DRY_RUN="--dry-run"
+      FLUG_ALL_DRY_RUN=true ;;
     "h" | * | "" )
       show_help ;;
    esac
 done
 
-if [ -z $ENV_NAME ] || [ -z $DIRECTORY_NAME ]; then
+if [ "$FLUG_ALL_DRY_RUN" = false ] && ( [ -z $ENV_NAME ] || [ -z $DIRECTORY_NAME ] ); then
   msg "Not Found 'ENV_NAME' or 'DIRECTORY_NAME'" "e";
   exit 1
 fi
 
-if [ -n "$ENV_NAME" ] && [ -n "$DIRECTORY_NAME" ] ; then
-  helm template ${DIRECTORY_NAME} --values ${DIRECTORY_NAME}/values/${ENV_NAME}-${DIRECTORY_NAME}.yaml > ${ENV_NAME}-${DIRECTORY_NAME}.yaml
-  kubectl apply -f ${ENV_NAME}-${DIRECTORY_NAME}.yaml ${DRY_RUN}
-  rm -rf ${ENV_NAME}-${DIRECTORY_NAME}.yaml
+if [ -n "$DRY_RUN" ] && [ -n "$POD_NAME" ]; then
+  msg "-p option can not be used when -c option is enabled" "e"
+  exit 1
 fi
+
+# $1 : environments
+# $2 : directory
+apply_template () {
+    helm template ${2} --values ${2}/values/${1}-${2}.yaml > ${1}-${2}.yaml
+    kubectl apply -f ${1}-${2}.yaml ${DRY_RUN}
+    rm -rf ${1}-${2}.yaml
+}
+
+if [ "$FLUG_ALL_DRY_RUN" = true ]; then
+  for DIR in `find . -maxdepth 1 -mindepth 1 -type d| gawk -F/ '{print $NF}'`; do
+    apply_template $ENV_NAME $DIR
+  done
+  exit 1
+  
+elif [ -n "$ENV_NAME" ] && [ -n "$DIRECTORY_NAME" ] ; then
+  apply_template $ENV_NAME $DIRECTORY_NAME
+fi
+
 
 if [ -n "$POD_NAME" ]; then
   kubectl delete pod -l app=${POD_NAME}

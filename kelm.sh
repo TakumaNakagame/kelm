@@ -130,6 +130,8 @@ apply_template () {
 
 clear
 
+echo -e "\033[0;32m##  --- Template Generate and Applying... ---\033[0;39m\n"
+
 if [ "$FLUG_ALL" = true ]; then
   for DIR in `find . -maxdepth 1 -mindepth 1 -type d| gawk -F/ '{print $NF}'`; do
     apply_template $ENV_NAME $DIR
@@ -140,7 +142,9 @@ elif [ -n "$ENV_NAME" ] && [ -n "$DIRECTORY_NAME" ] ; then
   apply_template $ENV_NAME $DIRECTORY_NAME
 fi
 
-
 if [ -n "$POD_NAME" ]; then
+  echo -e "\033[0;32m##  --- Pod Restarting... ---\033[0;39m\n"
   kubectl delete pod -l app=${POD_NAME}
 fi
+
+cowsay "Job Finish!"

@@ -20,6 +20,7 @@ show_help () {
       kelm -e ENV_NAME -d DIRECTORY_NAME
     
     OPTION
+      -n  RELEASE_NAME      : apply helm chart release name.
       -e  ENV_NAME          : select values files. ex) dev-prometheus.yaml > 'dev'
       -d  DIRECTORY_NAME    : apply directory path.
       -p  RESTART_POD_LABEL : restart pod. require pod 'app' label value.
@@ -82,9 +83,11 @@ if [ $# -le 1 ]; then
   show_help
 fi
 
-while getopts De:d:p:fAch OPT
+while getopts n:De:d:p:fAch OPT
 do
   case $OPT in
+    "n" )
+      RELEASE_NAME=$OPTARG ;;
     "e" )
       ENV_NAME=$OPTARG ;;
     "d" )
@@ -114,10 +117,14 @@ if [ -n "$DRY_RUN" ] && [ -n "$POD_NAME" ]; then
   exit 1
 fi
 
+if [ "$RELEASE_NAME" ]; then
+  RELEASE_NAME=${DIRECTORY_NAME}
+fi
+
 # $1 : environments
 # $2 : directory
 apply_template () {
-    helm template ${2} --values ${2}/values/${1}-${2}.yaml --name ${2} > ${1}-${2}.yaml
+    helm template ${2} --values ${2}/values/${1}-${2}.yaml --name ${RELEASE_NAME} > ${1}-${2}.yaml
     # echo "### --- ${1}-${2} ---"
     echo -e "\033[0;32m### --- ${1}-${2} ---\033[0;39m"
     kubectl ${ACTION} -f ${1}-${2}.yaml ${DRY_RUN}

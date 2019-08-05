@@ -117,7 +117,7 @@ fi
 # $1 : environments
 # $2 : directory
 apply_template () {
-    helm template ${2} --values ${2}/values/${1}-${2}.yaml > ${1}-${2}.yaml
+    helm template ${2} --values ${2}/values/${1}-${2}.yaml --name ${2} > ${1}-${2}.yaml
     # echo "### --- ${1}-${2} ---"
     echo -e "\033[0;32m### --- ${1}-${2} ---\033[0;39m"
     kubectl ${ACTION} -f ${1}-${2}.yaml ${DRY_RUN}

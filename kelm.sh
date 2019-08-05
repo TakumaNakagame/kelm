@@ -128,8 +128,6 @@ apply_template () {
     fi
 }
 
-clear
-
 echo -e "\033[0;32m##  --- Template Generate and Applying... ---\033[0;39m\n"
 
 if [ "$FLUG_ALL" = true ]; then

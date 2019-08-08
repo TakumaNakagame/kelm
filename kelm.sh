@@ -11,6 +11,7 @@ initialize () {
   FLUG_ALL=false
   FLUG_ERROR=false
   FLUG_FILE_DELETE=true
+  RELEASE_NAME=""
 }
 
 show_help () {
@@ -117,13 +118,14 @@ if [ -n "$DRY_RUN" ] && [ -n "$POD_NAME" ]; then
   exit 1
 fi
 
-if [ "$RELEASE_NAME" ]; then
-  RELEASE_NAME=${DIRECTORY_NAME}
-fi
-
 # $1 : environments
 # $2 : directory
 apply_template () {
+
+    if [ -z "$RELEASE_NAME" ]; then
+      RELEASE_NAME=${2}
+    fi
+
     helm template ${2} --values ${2}/values/${1}-${2}.yaml --name ${RELEASE_NAME} > ${1}-${2}.yaml
     # echo "### --- ${1}-${2} ---"
     echo -e "\033[0;32m### --- ${1}-${2} ---\033[0;39m"

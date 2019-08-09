@@ -108,32 +108,43 @@ do
    esac
 done
 
-if [ "$FLUG_ALL" = false ] && ( [ -z $ENV_NAME ] || [ -z $DIRECTORY_NAME ] ); then
-  msg "Not Found 'ENV_NAME' or 'DIRECTORY_NAME'" "e";
-  exit 1
-fi
-
 if [ -n "$DRY_RUN" ] && [ -n "$POD_NAME" ]; then
   msg "-p option can not be used when -c option is enabled" "e"
   exit 1
 fi
 
+
 # $1 : environments
 # $2 : directory
 apply_template () {
 
-    if [ -z "$RELEASE_NAME" ]; then
-      RELEASE_NAME=${2}
+    if [ $# -eq 2 ]; then
+      ENV=${1}
+      DIRECTORY=${2}
+    elif [ $# -eq 1 ]; then
+      DIRECTORY=${1}
+    else
+      msg "The argument is incorrect." "e"
+      exit 1
     fi
 
-    helm template ${2} --values ${2}/values/${1}-${2}.yaml --name ${RELEASE_NAME} > ${1}-${2}.yaml
-    # echo "### --- ${1}-${2} ---"
-    echo -e "\033[0;32m### --- ${1}-${2} ---\033[0;39m"
-    kubectl ${ACTION} -f ${1}-${2}.yaml ${DRY_RUN}
+    if [ -z "$RELEASE_NAME" ]; then
+      RELEASE_NAME=${DIRECTORY}
+    fi
+
+    if [ -z "$ENV_NAME" ]; then
+      ENV_FILE="${DIRECTORY}/values.yaml"
+    else
+      ENV_FILE="${DIRECTORY}/values/${ENV}-${DIRECTORY}.yaml"
+    fi
+
+    helm template ${DIRECTORY} --values ${ENV_FILE} --name ${RELEASE_NAME} > ${ENV}-${DIRECTORY}.yaml
+    echo -e "\033[0;32m### --- ${ENV}-${DIRECTORY} ---\033[0;39m"
+    kubectl ${ACTION} -f ${ENV}-${DIRECTORY}.yaml ${DRY_RUN}
     echo ""
 
     if [ "$FLUG_FILE_DELETE" = true ]; then
-      rm -rf ${1}-${2}.yaml
+      rm -rf ${ENV}-${DIRECTORY}.yaml
     fi
 }
 
@@ -145,7 +156,7 @@ if [ "$FLUG_ALL" = true ]; then
   done
   exit 1
 
-elif [ -n "$ENV_NAME" ] && [ -n "$DIRECTORY_NAME" ] ; then
+else
   apply_template $ENV_NAME $DIRECTORY_NAME
 fi
 

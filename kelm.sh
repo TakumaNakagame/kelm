@@ -153,6 +153,8 @@ echo -e "\033[0;32m##  --- Template Generate and Applying... ---\033[0;39m\n"
 if [ "$FLUG_ALL" = true ]; then
   for DIR in `find . -maxdepth 1 -mindepth 1 -type d| gawk -F/ '{print $NF}'`; do
     apply_template $ENV_NAME $DIR
+    RELEASE_NAME=""
+    DIRECTORY=""
   done
   exit 1
 

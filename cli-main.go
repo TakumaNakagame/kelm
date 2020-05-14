@@ -55,7 +55,7 @@ func main(){
       showCmd.Parse(os.Args[2:])
       if len(showPath) == 0{
         fmt.Println("ERROR: require: path option")
-        fmt.Println(showCmd.PrintDefaults())
+        showCmd.PrintDefaults()
         os.Exit(1)
       }
       core.Show(showEnv, showPath, showCmd.Args())

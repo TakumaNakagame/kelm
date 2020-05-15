@@ -1,6 +1,22 @@
 # kelm
 kelm is Helm wrapper.
 
+## Example
+
+```
+# Apply manifests
+kelm apply -e dev ./prometheus
+
+# Generate manifests
+kelm show -e dev ./prometheus
+
+# Delete app in your cluster using genelated manifests
+kelm delete -e dev ./prometheus
+
+# Delete app in your cluster using genelated manifests (Force)
+kelm delete -e dev -force ./prometheus
+```
+
 ## subcommand
 
 ```
@@ -20,4 +36,17 @@ recreate: 'kubectl delete -f -' && 'kubectl apply -f -'
 -n, -namespace    string  : apply namespace
     -name         string  : release name
 -f, -values       []string: using values file(mlutiple), (default: '${APP_NAME}/values/${ENV}-values.yaml')
+    -debug        bool    : enable debug log
+```
+
+### Delete
+
+```
+-F, -force bool: force delete
+```
+
+### Recreate
+
+```
+-F, -force bool: force recreate(force delete)
 ```
